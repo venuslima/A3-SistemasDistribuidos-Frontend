@@ -1,17 +1,127 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="./styles/style.css" rel="stylesheet">
-    <title>Reajustar Produtos</title>
+    <link href="styles/style.css" rel="stylesheet">
+    <title>Reajustar Quantidade</title>
 </head>
-<body>
-    <header>
-        <div id="title">
-            <h1>Reajustar produtos</h1>
-        </div>
-    </header>
 
+<body>
+    <a href="index.html">
+        <li>Voltar</li>
+    </a>
+    <h1>Reajustar Quantidade</h1>
+
+    <h2>Selecionar Produto</h2>
+    <select id="selectProduto">
+        <option value="" disabled selected>Selecione um produto</option>
+    </select>
+
+    <hr>
+
+    <h2>Quantidade Atual</h2>
+    <p>Quantidade: <span id="qtdAtual">0</span></p>
+
+    <hr>
+
+    <h2>Adicionar ou Remover</h2>
+    <form id="formReajuste">
+        <input id="qtdAlterar" type="number" placeholder="Quantidade a alterar" required><br>
+        <select id="tipoAlteracao">
+            <option value="entrada">Adicionar</option>
+            <option value="saida">Remover</option>
+        </select><br>
+        <button type="submit">Salvar</button>
+    </form>
+
+    <script>
+        const API_ITEM = "http://localhost:8080/item";
+        const API_MOV = "http://localhost:8080/movimentacao";
+        let itens = [];
+
+        async function carregarProdutos() {
+            const resp = await fetch(API_ITEM);
+            itens = await resp.json();
+
+            const sel = document.getElementById("selectProduto");
+            sel.innerHTML = '<option value="" disabled selected>Selecione um produto</option>';
+
+            itens.forEach(p => {
+                const opt = document.createElement("option");
+                opt.value = p.id;
+                opt.textContent = p.nome;
+                sel.appendChild(opt);
+            });
+        }
+
+        document.getElementById("selectProduto").addEventListener("change", function () {
+            const id = Number(this.value);
+            const prod = itens.find(x => x.id === id);
+            document.getElementById("qtdAtual").textContent = prod ? prod.quantidade : 0;
+            document.getElementById("qtdAlterar").value = "";
+        });
+
+        document.getElementById("formReajuste").addEventListener("submit", async e => {
+            e.preventDefault();
+
+            const id = document.getElementById("selectProduto").value;
+            if (!id) return alert("Selecione um produto!");
+
+            const prod = itens.find(x => x.id == id);
+            let qtdAlterar = Number(document.getElementById("qtdAlterar").value);
+            if (isNaN(qtdAlterar) || qtdAlterar <= 0) return alert("Quantidade inválida!");
+
+            const tipo = document.getElementById("tipoAlteracao").value;
+
+            // Calcula a nova quantidade
+            let novaQtd = tipo === "entrada" ? prod.quantidade + qtdAlterar : prod.quantidade - qtdAlterar;
+            if (novaQtd < 0) {
+                alert("Não é possível remover mais unidades do que existem!");
+                return;
+            }
+
+            const atualizado = {
+                nome: prod.nome,
+                preco: prod.preco,
+                quantidade: novaQtd,
+                quantidadeMin: prod.quantidadeMin,
+                quantidadeMax: prod.quantidadeMax,
+                categoria: prod.categoria ? { id: prod.categoria.id } : null
+            };
+
+            try {
+                // Atualiza o item
+                await fetch(`${API_ITEM}/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(atualizado)
+                });
+
+                // Cria movimentação via query string (para @RequestParam)
+                const params = new URLSearchParams({
+                    itemId: prod.id,
+                    quantidade: qtdAlterar,
+                    tipo: tipo === "entrada" ? "Entrada" : "Saída"
+                });
+
+                await fetch(`${API_MOV}?${params.toString()}`, { method: "POST" });
+
+                // Atualiza a tela
+                prod.quantidade = novaQtd;
+                document.getElementById("qtdAtual").textContent = novaQtd;
+                document.getElementById("qtdAlterar").value = "";
+
+                alert("Operação realizada com sucesso!");
+            } catch (err) {
+                console.error(err);
+                alert("Erro ao atualizar no banco.");
+            }
+        });
+
+        carregarProdutos();
+    </script>
 </body>
+
 </html>

@@ -1,3 +1,17 @@
 body{
-    background-color: rgba(130, 215, 218, 0.938);
+    background-color: rgba(226, 246, 255, 0.938);
+}
+form{
+    display: flex;
+    flex-direction: row;
+    margin: 5px;
+}
+input{
+    margin: 5px;
+}
+button{
+    margin: 5px;
+}
+select{
+    margin: 5px;
 }

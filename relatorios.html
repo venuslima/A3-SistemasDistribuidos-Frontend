@@ -1,12 +1,205 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="./styles/style.css" rel="stylesheet">
-    <title>Relatórios</title>
+    <link href="styles/style.css" rel="stylesheet">
+    <title>Relatórios de Estoque</title>
 </head>
+
 <body>
-    
+    <a href="index.html"><li>Voltar</li></a>
+    <h1>Relatórios de Estoque</h1>
+
+    <h2>Lista de Preços</h2>
+    <table border="1" id="tabelaPrecos">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Preço</th>
+                <th>Quantidade</th>
+                <th>Categoria</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <hr>
+
+    <h2>Balanço Físico/Financeiro</h2>
+    <table border="1" id="tabelaBalanco">
+        <thead>
+            <tr>
+                <th>Produto</th>
+                <th>Quantidade</th>
+                <th>Preço Unitário</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3"><strong>Total Geral do Estoque</strong></td>
+                <td id="totalEstoque"></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <hr>
+
+    <h2>Produtos abaixo da quantidade mínima</h2>
+    <table border="1" id="tabelaAbaixoMinimo">
+        <thead>
+            <tr>
+                <th>Produto</th>
+                <th>Quantidade Mínima</th>
+                <th>Quantidade em Estoque</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <hr>
+
+    <h2>Quantidade de produtos por categoria</h2>
+    <table border="1" id="tabelaCategoria">
+        <thead>
+            <tr>
+                <th>Categoria</th>
+                <th>Quantidade de Produtos</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <hr>
+
+   
+    <h2>Produtos com mais Entrada e Saída</h2>
+    <table border="1" id="tabelaTopMovimento">
+        <thead>
+            <tr>
+                <th>Produto</th>
+                <th>Mais Entrada</th>
+                <th>Mais Saída</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        const API_ITEM = "http://localhost:8080/item";
+        const API_MOV = "http://localhost:8080/movimentacao";
+        const API_CATEGORIA = "http://localhost:8080/categoria";
+
+        
+        async function carregarItens() {
+            const resp = await fetch(API_ITEM);
+            const itens = await resp.json();
+
+            
+            const tbodyPrecos = document.querySelector("#tabelaPrecos tbody");
+            tbodyPrecos.innerHTML = "";
+
+           
+            const tbodyBalanco = document.querySelector("#tabelaBalanco tbody");
+            tbodyBalanco.innerHTML = "";
+            let totalEstoque = 0;
+
+            
+            const tbodyAbaixoMin = document.querySelector("#tabelaAbaixoMinimo tbody");
+            tbodyAbaixoMin.innerHTML = "";
+
+            itens.forEach(p => {
+                
+                const trPreco = document.createElement("tr");
+                trPreco.innerHTML = `
+                    <td>${p.nome}</td>
+                    <td>${p.preco.toFixed(2)}</td>
+                    <td>${p.quantidade}</td>
+                    <td>${p.categoria?.nome || "-"}</td>
+                `;
+                tbodyPrecos.appendChild(trPreco);
+
+                
+                const total = (p.quantidade || 0) * (p.preco || 0);
+                totalEstoque += total;
+                const trBalanco = document.createElement("tr");
+                trBalanco.innerHTML = `
+                    <td>${p.nome}</td>
+                    <td>${p.quantidade}</td>
+                    <td>${p.preco.toFixed(2)}</td>
+                    <td>${total.toFixed(2)}</td>
+                `;
+                tbodyBalanco.appendChild(trBalanco);
+
+                
+                if (p.quantidade < p.quantidadeMin) {
+                    const trMin = document.createElement("tr");
+                    trMin.innerHTML = `
+                        <td>${p.nome}</td>
+                        <td>${p.quantidadeMin}</td>
+                        <td>${p.quantidade}</td>
+                    `;
+                    tbodyAbaixoMin.appendChild(trMin);
+                }
+            });
+
+            document.getElementById("totalEstoque").textContent = totalEstoque.toFixed(2);
+        }
+
+        
+        async function carregarCategorias() {
+            const resp = await fetch(API_CATEGORIA);
+            const categorias = await resp.json();
+            const tbodyCat = document.querySelector("#tabelaCategoria tbody");
+            tbodyCat.innerHTML = "";
+
+            categorias.forEach(cat => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${cat.nome}</td>
+                    <td>${cat.itens?.length || 0}</td>
+                `;
+                tbodyCat.appendChild(tr);
+            });
+        }
+
+        
+        async function carregarMovimentacoes() {
+            const resp = await fetch(API_MOV);
+            const movs = await resp.json();
+            const tbody = document.querySelector("#tabelaTopMovimento tbody");
+            tbody.innerHTML = "";
+
+            
+            const mapa = {};
+            movs.forEach(m => {
+                const nome = m.produto?.nome || "Desconhecido";
+                if (!mapa[nome]) mapa[nome] = { entrada: 0, saida: 0 };
+                if (m.tipo === "Entrada") mapa[nome].entrada += m.quantidade;
+                if (m.tipo === "Saída") mapa[nome].saida += m.quantidade;
+            });
+
+            for (const nome in mapa) {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${nome}</td>
+                    <td>${mapa[nome].entrada}</td>
+                    <td>${mapa[nome].saida}</td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
+
+        async function carregarTodosRelatorios() {
+            await carregarItens();
+            await carregarCategorias();
+            await carregarMovimentacoes();
+        }
+
+        carregarTodosRelatorios();
+    </script>
 </body>
 </html>
