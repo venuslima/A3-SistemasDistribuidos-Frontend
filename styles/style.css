@@ -1,5 +1,12 @@
+@font-face {
+    font-family: sans-serif;
+    src: url('./components/fonts/Ubuntu-Regular.ttf') format('ttf');
+    font-weight: normal;
+    font-style: normal;
+}
 body{
     background-color: rgba(226, 246, 255, 0.938);
+    font-family: 'Ubuntu-Regular', sans-serif;
 }
 form{
     display: flex;
