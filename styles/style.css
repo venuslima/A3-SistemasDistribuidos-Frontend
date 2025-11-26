@@ -22,3 +22,6 @@ button{
 select{
     margin: 5px;
 }
+img{
+    clip-path: inset(30% 0% 30% 0%);
+}

@@ -57,7 +57,26 @@
                 <th>Quantidade em Estoque</th>
             </tr>
         </thead>
-        <tbody></tbody>
+        <tbody>
+            <script>
+    fetch("http://localhost:8080/produtos/minimos")
+        .then(resp => resp.json())
+        .then(lista => {
+            const tabela = document.querySelector("#tabelaAbaixoMinimo tbody");
+
+            lista.forEach(produto => {
+                const linha = document.createElement("tr");
+                linha.innerHTML = `
+                    <td>${produto.nome}</td>
+                    <td>${produto.quantidadeMinima}</td>
+                    <td>${produto.quantidadeEstoque}</td>
+                `;
+                tabela.appendChild(linha);
+            });
+        })
+        .catch(err => console.error("Erro ao carregar relatório:", err));
+    </script>
+        </tbody>
     </table>
 
     <hr>
@@ -85,10 +104,7 @@
                 <th>Mais Saída</th>
             </tr>
         </thead>
-        <tbody></tbody>
-    </table>
-
-    <script>
+        <tbody><script>
         const API_ITEM = "http://localhost:8080/item";
         const API_MOV = "http://localhost:8080/movimentacao";
         const API_CATEGORIA = "http://localhost:8080/categoria";
@@ -200,6 +216,9 @@
         }
 
         carregarTodosRelatorios();
-    </script>
+    </script></tbody>
+    </table>
+
+    
 </body>
 </html>
