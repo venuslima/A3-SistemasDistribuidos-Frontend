@@ -17,12 +17,12 @@
         <option value="" disabled selected>Selecione um produto</option>
     </select>
 
-    <hr>
+
 
     <h2>Quantidade Atual</h2>
     <p>Quantidade: <span id="qtdAtual">0</span></p>
 
-    <hr>
+
 
     <h2>Adicionar ou Remover</h2>
     <form id="formReajuste">
@@ -73,7 +73,7 @@
 
             const tipo = document.getElementById("tipoAlteracao").value;
 
-            // Calcula a nova quantidade
+
             let novaQtd = tipo === "entrada" ? prod.quantidade + qtdAlterar : prod.quantidade - qtdAlterar;
             if (novaQtd < 0) {
                 alert("Não é possível remover mais unidades do que existem!");
@@ -90,23 +90,26 @@
             };
 
             try {
-                // Atualiza o item
+
                 await fetch(`${API_ITEM}/${id}`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(atualizado)
                 });
 
-                // Cria movimentação via query string (para @RequestParam)
-                const params = new URLSearchParams({
-                    itemId: prod.id,
-                    quantidade: qtdAlterar,
-                    tipo: tipo === "entrada" ? "Entrada" : "Saída"
+
+                await fetch(API_MOV, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        produto: { id: prod.id },
+                        quantidade: qtdAlterar,
+                        tipo: tipo === "entrada" ? "Entrada" : "Saída"
+                    })
                 });
 
-                await fetch(`${API_MOV}?${params.toString()}`, { method: "POST" });
 
-                // Atualiza a tela
+
                 prod.quantidade = novaQtd;
                 document.getElementById("qtdAtual").textContent = novaQtd;
                 document.getElementById("qtdAlterar").value = "";

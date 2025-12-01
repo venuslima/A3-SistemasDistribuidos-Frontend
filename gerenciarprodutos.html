@@ -12,20 +12,20 @@
 <body>
     <h1>Gerenciar Produtos</h1>
 
-    
+
     <h2>Categorias</h2>
     <form id="formCategoria">
         <input id="nomeCategoria" type="text" placeholder="Nova Categoria">
         <input id="embalagem" type="text" placeholder="Embalagem">
         <input id="tamanho" type="text" placeholder="Tamanho">
-        <button type="submit">Adicionar Categoria</button>
     </form>
 
+    <button type="submit">Adicionar Categoria</button>
     <select id="selectCategoria"></select>
 
-    <hr>
-
     
+
+
     <h2>Incluir Produto</h2>
     <form id="formAdd">
         <input id="nome" type="text" placeholder="Nome do produto"><br>
@@ -33,13 +33,14 @@
         <input id="quantidade" type="number" placeholder="Quantidade"><br>
         <input id="quantidadeMin" type="number" placeholder="Quantidade Mínima"><br>
         <input id="quantidadeMax" type="number" placeholder="Quantidade Máxima"><br>
-        <select id="selectCategoriaProduto"></select><br>
-        <button type="submit">Adicionar</button>
     </form>
 
-    <hr>
+    <select id="selectCategoriaProduto"></select><br>
+    <button type="submit">Adicionar</button>
 
     
+
+
     <h2>Alterar Produto</h2>
     <select id="selectEditar">
         <option value="" disabled selected>Selecione um produto</option>
@@ -47,9 +48,9 @@
     <button onclick="editarProduto()">Editar</button>
     <button onclick="excluirProduto()">Excluir</button>
 
-    <hr>
-
     
+
+
     <p>Nome: <span id="nomeSelecionado"></span></p>
     <p>Preço: <span id="precoSelecionado"></span></p>
     <p>Quantidade: <span id="quantidadeSelecionado"></span></p>
@@ -64,14 +65,14 @@
         let listaItens = [];
         let listaCategorias = [];
 
-        
+
         async function carregarCategorias() {
             const resp = await fetch(API_CATEGORIA);
             listaCategorias = await resp.json();
 
             const selCat = document.getElementById("selectCategoria");
             const selCatProduto = document.getElementById("selectCategoriaProduto");
-            selCat.innerHTML = '<option value="" disabled selected>Selecione uma categoria</option>';
+            selCat.innerHTML = '<option value="" disabled selected>Categorias</option>';
             selCatProduto.innerHTML = '<option value="" disabled selected>Selecione uma categoria</option>';
 
             listaCategorias.forEach(c => {
@@ -83,12 +84,12 @@
 
                 const opt2 = document.createElement("option");
                 opt2.value = c.id;
-                opt2.textContent = c.nome;
+                opt2.textContent = texto;
                 selCatProduto.appendChild(opt2);
             });
         }
 
-        
+
         document.getElementById("formCategoria").addEventListener("submit", async e => {
             e.preventDefault();
             const nome = document.getElementById("nomeCategoria").value;
@@ -112,7 +113,7 @@
 
         carregarCategorias();
 
-       
+
         async function carregarProdutos() {
             const resp = await fetch(API_ITEM);
             listaItens = await resp.json();
@@ -128,7 +129,7 @@
             });
         }
 
-        
+
         document.getElementById("formAdd").addEventListener("submit", async e => {
             e.preventDefault();
 
@@ -151,7 +152,7 @@
             alert("Produto adicionado!");
         });
 
-       
+
         document.getElementById("selectEditar").addEventListener("change", function () {
             const id = Number(this.value);
             const produto = listaItens.find(p => p.id === id);
@@ -165,7 +166,7 @@
             document.getElementById("categoriaSelecionada").textContent = produto.categoria ? produto.categoria.nome : "";
         });
 
-       
+
         async function editarProduto() {
             const id = document.getElementById("selectEditar").value;
             if (!id) { alert("Selecione um produto antes de editar!"); return; }
@@ -201,7 +202,7 @@
             alert("Produto atualizado!");
         }
 
-       
+
         async function excluirProduto() {
             const id = document.getElementById("selectEditar").value;
             if (!id) return;
@@ -211,7 +212,7 @@
             alert("Produto excluído!");
         }
 
-       
+
         carregarCategorias();
         carregarProdutos();
     </script>

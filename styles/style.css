@@ -7,25 +7,31 @@
 
 * {
     font-family: 'Ubuntu-Regular', sans-serif;
+
+
 }
 
 body {
-    background-color: #cae8f5;
+    background-color: #E4F7FF;
     padding: 5%;
+
+    --color: #cae8f5;
+    background-image: linear-gradient(0deg, transparent 24%, var(--color) 25%, var(--color) 26%, transparent 27%, transparent 74%, var(--color) 75%, var(--color) 76%, transparent 77%, transparent),
+        linear-gradient(90deg, transparent 24%, var(--color) 25%, var(--color) 26%, transparent 27%, transparent 74%, var(--color) 75%, var(--color) 76%, transparent 77%, transparent);
+    background-size: 55px 55px;
 }
 
 
 form {
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+    flex-wrap: inherit;
     max-width: 400px;
-    margin: 5px;
     color: black;
 }
 
 
-input, select {
+input {
+    margin: 5px;
     padding: 0.5em 0.75em;
     border-radius: 0.2em;
     border: 1px solid #888;
@@ -33,8 +39,18 @@ input, select {
     letter-spacing: 0.1ch;
     flex: 1;
     min-width: 150px;
+    max-width: 150px;
 }
 
+select {
+    margin: 5px;
+    padding: 0.5em 0.75em;
+    border-radius: 0.2em;
+    border: 1px solid #888;
+    font-size: 1rem;
+    letter-spacing: 0.1ch;
+    flex: 1;
+}
 
 button {
     display: flex;
@@ -48,7 +64,7 @@ button {
     cursor: pointer;
     border: none;
     background: #fff;
-    margin: 5px 0;
+    margin: 5px;
 }
 
 button:hover {
@@ -87,7 +103,8 @@ li a.btn:hover {
 
 
 
-h1, h2 {
+h1,
+h2 {
     color: #1c3b47;
     margin-top: 25px;
 }
@@ -111,7 +128,8 @@ table thead {
 }
 
 
-table th, table td {
+table th,
+table td {
     padding: 12px 15px;
     text-align: left;
 }
