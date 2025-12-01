@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="styles/style.css" rel="stylesheet">
     <title>Relatórios de Estoque</title>
+    <li><a class="btn" href="index.html"> Voltar </a></li>
 </head>
 
 <body>
-    <a href="index.html"><li>Voltar</li></a>
     <h1>Relatórios de Estoque</h1>
 
     <h2>Lista de Preços</h2>
@@ -58,24 +58,7 @@
             </tr>
         </thead>
         <tbody>
-            <script>
-    fetch("http://localhost:8080/produtos/minimos")
-        .then(resp => resp.json())
-        .then(lista => {
-            const tabela = document.querySelector("#tabelaAbaixoMinimo tbody");
-
-            lista.forEach(produto => {
-                const linha = document.createElement("tr");
-                linha.innerHTML = `
-                    <td>${produto.nome}</td>
-                    <td>${produto.quantidadeMinima}</td>
-                    <td>${produto.quantidadeEstoque}</td>
-                `;
-                tabela.appendChild(linha);
-            });
-        })
-        .catch(err => console.error("Erro ao carregar relatório:", err));
-    </script>
+            
         </tbody>
     </table>
 
@@ -94,7 +77,7 @@
 
     <hr>
 
-   
+
     <h2>Produtos com mais Entrada e Saída</h2>
     <table border="1" id="tabelaTopMovimento">
         <thead>
@@ -104,121 +87,126 @@
                 <th>Mais Saída</th>
             </tr>
         </thead>
-        <tbody><script>
-        const API_ITEM = "http://localhost:8080/item";
-        const API_MOV = "http://localhost:8080/movimentacao";
-        const API_CATEGORIA = "http://localhost:8080/categoria";
+        <tbody>
+            <script>
+                const API_ITEM = "http://localhost:8080/item";
+                const API_MOV = "http://localhost:8080/movimentacao";
+                const API_CATEGORIA = "http://localhost:8080/categoria";
 
-        
-        async function carregarItens() {
-            const resp = await fetch(API_ITEM);
-            const itens = await resp.json();
 
-            
-            const tbodyPrecos = document.querySelector("#tabelaPrecos tbody");
-            tbodyPrecos.innerHTML = "";
+                async function carregarItens() {
+                    const resp = await fetch(API_ITEM);
+                    const itens = await resp.json();
 
-           
-            const tbodyBalanco = document.querySelector("#tabelaBalanco tbody");
-            tbodyBalanco.innerHTML = "";
-            let totalEstoque = 0;
 
-            
-            const tbodyAbaixoMin = document.querySelector("#tabelaAbaixoMinimo tbody");
-            tbodyAbaixoMin.innerHTML = "";
+                    const tbodyPrecos = document.querySelector("#tabelaPrecos tbody");
+                    tbodyPrecos.innerHTML = "";
 
-            itens.forEach(p => {
-                
-                const trPreco = document.createElement("tr");
-                trPreco.innerHTML = `
+
+                    const tbodyBalanco = document.querySelector("#tabelaBalanco tbody");
+                    tbodyBalanco.innerHTML = "";
+                    let totalEstoque = 0;
+
+
+                    const tbodyAbaixoMin = document.querySelector("#tabelaAbaixoMinimo tbody");
+                    tbodyAbaixoMin.innerHTML = "";
+
+                    itens.forEach(p => {
+
+                        const trPreco = document.createElement("tr");
+                        trPreco.innerHTML = `
                     <td>${p.nome}</td>
                     <td>${p.preco.toFixed(2)}</td>
                     <td>${p.quantidade}</td>
                     <td>${p.categoria?.nome || "-"}</td>
                 `;
-                tbodyPrecos.appendChild(trPreco);
+                        tbodyPrecos.appendChild(trPreco);
 
-                
-                const total = (p.quantidade || 0) * (p.preco || 0);
-                totalEstoque += total;
-                const trBalanco = document.createElement("tr");
-                trBalanco.innerHTML = `
+
+                        const total = (p.quantidade || 0) * (p.preco || 0);
+                        totalEstoque += total;
+                        const trBalanco = document.createElement("tr");
+                        trBalanco.innerHTML = `
                     <td>${p.nome}</td>
                     <td>${p.quantidade}</td>
                     <td>${p.preco.toFixed(2)}</td>
                     <td>${total.toFixed(2)}</td>
                 `;
-                tbodyBalanco.appendChild(trBalanco);
+                        tbodyBalanco.appendChild(trBalanco);
 
-                
-                if (p.quantidade < p.quantidadeMin) {
-                    const trMin = document.createElement("tr");
-                    trMin.innerHTML = `
+
+                        if (p.quantidade < p.quantidadeMin) {
+                            const trMin = document.createElement("tr");
+                            trMin.innerHTML = `
                         <td>${p.nome}</td>
                         <td>${p.quantidadeMin}</td>
                         <td>${p.quantidade}</td>
                     `;
-                    tbodyAbaixoMin.appendChild(trMin);
+                            tbodyAbaixoMin.appendChild(trMin);
+                        }
+                    });
+
+                    document.getElementById("totalEstoque").textContent = totalEstoque.toFixed(2);
                 }
-            });
 
-            document.getElementById("totalEstoque").textContent = totalEstoque.toFixed(2);
-        }
 
-        
-        async function carregarCategorias() {
-            const resp = await fetch(API_CATEGORIA);
-            const categorias = await resp.json();
-            const tbodyCat = document.querySelector("#tabelaCategoria tbody");
-            tbodyCat.innerHTML = "";
+                async function carregarCategorias() {
+                    const resp = await fetch("http://localhost:8080/categoria/quantidades");
+                    const categorias = await resp.json();
 
-            categorias.forEach(cat => {
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
-                    <td>${cat.nome}</td>
-                    <td>${cat.itens?.length || 0}</td>
-                `;
-                tbodyCat.appendChild(tr);
-            });
-        }
+                    const tbodyCat = document.querySelector("#tabelaCategoria tbody");
+                    tbodyCat.innerHTML = "";
 
-        
-        async function carregarMovimentacoes() {
-            const resp = await fetch(API_MOV);
-            const movs = await resp.json();
-            const tbody = document.querySelector("#tabelaTopMovimento tbody");
-            tbody.innerHTML = "";
+                    categorias.forEach(c => {
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = `
+            <td>${c.nome}</td>
+            <td>${c.quantidade}</td>
+        `;
+                        tbodyCat.appendChild(tr);
+                    });
+                }
 
-            
-            const mapa = {};
-            movs.forEach(m => {
-                const nome = m.produto?.nome || "Desconhecido";
-                if (!mapa[nome]) mapa[nome] = { entrada: 0, saida: 0 };
-                if (m.tipo === "Entrada") mapa[nome].entrada += m.quantidade;
-                if (m.tipo === "Saída") mapa[nome].saida += m.quantidade;
-            });
 
-            for (const nome in mapa) {
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
+
+                async function carregarMovimentacoes() {
+                    const resp = await fetch(API_MOV);
+                    const movs = await resp.json();
+                    const tbody = document.querySelector("#tabelaTopMovimento tbody");
+                    tbody.innerHTML = "";
+
+
+                    const mapa = {};
+                    movs.forEach(m => {
+                        const nome = m.produto?.nome || "Desconhecido";
+                        if (!mapa[nome]) mapa[nome] = { entrada: 0, saida: 0 };
+                        if (m.tipo === "Entrada") mapa[nome].entrada += m.quantidade;
+                        if (m.tipo === "Saída") mapa[nome].saida += m.quantidade;
+                    });
+
+                    for (const nome in mapa) {
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = `
                     <td>${nome}</td>
                     <td>${mapa[nome].entrada}</td>
                     <td>${mapa[nome].saida}</td>
                 `;
-                tbody.appendChild(tr);
-            }
-        }
+                        tbody.appendChild(tr);
+                    }
+                }
 
-        async function carregarTodosRelatorios() {
-            await carregarItens();
-            await carregarCategorias();
-            await carregarMovimentacoes();
-        }
+                async function carregarTodosRelatorios() {
+                    await carregarItens();
+                    await carregarCategorias();
+                    await carregarMovimentacoes();
+                }
 
-        carregarTodosRelatorios();
-    </script></tbody>
+                carregarTodosRelatorios();
+            </script>
+        </tbody>
     </table>
 
-    
+
 </body>
+
 </html>
