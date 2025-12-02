@@ -16,29 +16,38 @@
     <h2>Categorias</h2>
     <form id="formCategoria">
         <input id="nomeCategoria" type="text" placeholder="Nova Categoria">
-        <input id="embalagem" type="text" placeholder="Embalagem">
         <input id="tamanho" type="text" placeholder="Tamanho">
+        <input id="embalagem" type="text" placeholder="Embalagem">
+        <button type="submit">Adicionar Categoria</button>
     </form>
 
-    <button type="submit">Adicionar Categoria</button>
-    <select id="selectCategoria"></select>
-
     
+    <table border="1" id="selectCategoria" class="scrollTable">
+        <thead>
+            <th>Categorias</th>
+        </thead>
+        <tbody></tbody>
+    </table> 
+
+
 
 
     <h2>Incluir Produto</h2>
     <form id="formAdd">
+        
         <input id="nome" type="text" placeholder="Nome do produto"><br>
-        <input id="preco" type="number" placeholder="Preço"><br>
+        <input id="preco" type="number" step="any" placeholder="Preço"><br>
         <input id="quantidade" type="number" placeholder="Quantidade"><br>
         <input id="quantidadeMin" type="number" placeholder="Quantidade Mínima"><br>
         <input id="quantidadeMax" type="number" placeholder="Quantidade Máxima"><br>
+        <select id="selectCategoriaProduto"></select><br>
+        
+        <button type="submit">Adicionar</button>
     </form>
 
-    <select id="selectCategoriaProduto"></select><br>
-    <button type="submit">Adicionar</button>
-
     
+
+
 
 
     <h2>Alterar Produto</h2>
@@ -48,15 +57,30 @@
     <button onclick="editarProduto()">Editar</button>
     <button onclick="excluirProduto()">Excluir</button>
 
-    
 
 
-    <p>Nome: <span id="nomeSelecionado"></span></p>
-    <p>Preço: <span id="precoSelecionado"></span></p>
-    <p>Quantidade: <span id="quantidadeSelecionado"></span></p>
-    <p>Qtd. Mínima: <span id="quantidadeMinSelecionado"></span></p>
-    <p>Qtd. Máxima: <span id="quantidadeMaxSelecionado"></span></p>
-    <p>Categoria: <span id="categoriaSelecionada"></span></p>
+    <table  border="1">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Preço</th>
+                <th>Quantidade</th>
+                <th>Qtd. Mínima</th>
+                <th>Qtd. Máxima</th>
+                <th>Categoria</th>
+            </tr>
+        </thead>
+        <tbody>
+            <td><span id="nomeSelecionado"></span></td>
+            <td><span id="precoSelecionado"></span></td>
+            <td><span id="quantidadeSelecionado"></span></td>
+            <td><span id="quantidadeMinSelecionado"></span></td>
+            <td><span id="quantidadeMaxSelecionado"></span></td>
+            <td><span id="categoriaSelecionada"></span></td>
+        </tbody>
+    </table>
+
+
 
     <script>
         const API_ITEM = "http://localhost:8080/item";
@@ -69,24 +93,34 @@
         async function carregarCategorias() {
             const resp = await fetch(API_CATEGORIA);
             listaCategorias = await resp.json();
+            listaCat = listaCategorias;
 
-            const selCat = document.getElementById("selectCategoria");
+            
             const selCatProduto = document.getElementById("selectCategoriaProduto");
-            selCat.innerHTML = '<option value="" disabled selected>Categorias</option>';
             selCatProduto.innerHTML = '<option value="" disabled selected>Selecione uma categoria</option>';
 
             listaCategorias.forEach(c => {
                 const texto = `${c.nome} (${c.tamanho}, ${c.embalagem})`;
-                const opt1 = document.createElement("option");
-                opt1.value = c.id;
-                opt1.textContent = texto;
-                selCat.appendChild(opt1);
-
+                
                 const opt2 = document.createElement("option");
                 opt2.value = c.id;
                 opt2.textContent = texto;
                 selCatProduto.appendChild(opt2);
+
             });
+
+            const tabela = document.querySelector("#selectCategoria tbody");
+            tabela.innerHTML = "";
+
+            listaCat.forEach(categoria => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${categoria.nome} (${categoria.tamanho}, ${categoria.embalagem})</td>
+                `;
+                tabela.appendChild(tr);
+            });
+
+
         }
 
 
